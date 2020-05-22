@@ -1,0 +1,248 @@
+如果你没有图形界面的话……
+
+<===== ArchLinux UEFI + GPT 安装 让人看得懂的一带一路教程 =====>
+
+<== via iotang | 2020-05-21 ==>
+
+# root 下的命令
+$ 普通用户下的命令
+
+=== 第一次开机 ===
+
+联网
+	有线网
+		# dhcpcd
+	无线网
+		# wifi-menu
+	尝试是否有网络连接
+		# ping www.baidu.com
+
+	当然如果把 Live 的桌面系统设置好了的话一般会自动连上的。
+
+更新系统时间
+	# timedatectl set-ntp true
+
+分区
+	查看目前的分区情况
+		# fdisk -l
+​	用 fdisk 给某个硬盘分区
+		# fdisk /dev/sdX
+​	或者用比较好用的 cfdisk
+		# cfdisk /dev/sdX
+​	fdisk 用法
+​		创建 gpt 分区表
+			# g
+​		创建新分区
+			# n
+​		查看分区
+			# p
+​		更改分区的类型
+			# t
+​			查看所有支持的类型
+				# l
+​		将之前所有的操作写入磁盘生效
+			# w
+
+	注意一定要有一个引导分区和一个根分区。
+	引导分区的分区类型应该是 EFI。
+	根分区等文件系统分区 Linux 文件系统。
+	如果有交换分区，那么它的分区类型应该是 Linux Swap。
+
+格式化分区
+	格式化引导分区
+		# mkfs.fat -F32 /dev/sd（你的引导分区）
+	格式化文件系统分区
+		# mkfs.ext4 /dev/sd（你的文件系统分区）
+	格式化并且启动 Swap 分区
+		# mkswap /dev/sd（你的 Swap 分区）
+		# swapon /dev/sd（你的 Swap 分区）
+
+挂载分区
+	如果没有相应目录的话就先创建。
+	
+	挂载根分区
+		# mount /dev/sd（你的根分区） /mnt
+	挂载引导分区
+		# mount /dev/sd（你的引导分区） /mnt/boot
+		
+	注意 Swap 是不用挂载的。
+
+选择镜像源
+	# vim /etc/pacman.d/mirrorlist
+	
+	把要用的镜像源放到最前面。
+	一般来说阿里源和清华源比较快。
+
+刷新源
+	# pacman -Syu
+
+安装基本包
+	# pacstrap /mnt base base-devel linux linux-firmware dhcpcd
+
+配置 Fstab 「高危」
+	# genfstab -L /mnt >> /mnt/etc/fstab
+	看看 Fstab 是不是正确的，这非常重要！
+		# cat /mnt/etc/fstab
+		对比 blkid 命令下硬盘分区 UID 和此文件是否对应！
+
+换根操作
+	# arch-chroot /mnt
+
+注意，从现在开始，你已经开始设置机上的系统了！
+
+设置时区
+	# ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	# hwclock --systohc
+
+创建一个初始 RAM Disk（？）
+	# mkinitcpio -P
+
+安装必需软件包
+	# pacman -S vim dialog wpa_supplicant ntfs-3g networkmanager iw dhcpcd netctl
+	
+	不装的话等会启动系统没法连网络就 sb 了。
+
+设置 Locale
+	# vim /etc/locale.gen
+	保留 zh_CN.UTF-8 UTF-8。
+	也可以保留 en_US.UTF-8 UTF-8。
+	
+	# locale-gen
+	
+	# vim /etc/locale.conf
+	输入 LANG=en_US.UTF-8。（如果用中文的话小心终端没法显示中文。）
+
+设置主机名
+	# echo 这台主机的名字 > /etc/hostname
+	# vim /etc/hosts
+	添加如下内容：
+		127.0.0.1	localhost
+		::1		localhost
+		127.0.1.1	这台主机的名字.localdomain	这台主机的名字
+
+设置 Root 密码
+	# passwd
+
+如果你是 Intel CPU
+	# pacman -S intel-ucode
+
+创建引导 「高危」
+	# pacman -S grub efibootmgr
+	# grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+	# grub-mkconfig -o /boot/grub/grub.cfg
+
+重启
+	# exit
+	# umount -R /mnt
+	# reboot
+
+=== 第二次开机 ===
+
+联网
+	有线网
+		# dhcpcd
+	无线网
+		# wifi-menu
+	尝试是否有网络连接
+		# ping www.baidu.com
+
+新建用户
+	# useradd -m -G wheel 你的名字
+
+配置 sudo
+	# pacman -S sudo
+	# visudo
+	找到
+		# %wheel ALL=(ALL)ALL
+	然后去掉前面的井号，也就是变成这样子：
+		%wheel ALL=(ALL)ALL
+
+重启
+	# reboot
+
+=== 第三次开机 ===
+
+（用你刚才新建的账户登录）
+
+联网
+
+刷新源
+	$ sudo pacman -Syu
+
+显卡驱动
+	如果你是 AMD：
+		$ sudo pacman -S xf86-video-amdgpu xf86-video-ati mesa
+	如果你是 Intel 核芯显卡：
+		$ sudo pacman -S xf86-video-intel mesa
+	如果你是英伟达：
+		$ sudo pacman -S xf86-video-nouveau mesa
+	当然，如果你是硬件盲，或者你懒得知道想来个一本满足：
+		$ sudo pacman -S mesa xorg-drivers
+
+安装 Xorg
+	$ sudo pacman -S xorg
+	
+	什么，你要 Wayland？自己折腾吧，你一定知道怎么做。
+
+安装桌面环境
+	安装 KDE（精简一点）
+		$ sudo pacman -S plasma kdeadmin kdebase kdeutils
+	安装 KDE（全家桶）
+		$ sudo pacman -S plasma kde-applications
+		
+		全家桶是真的全家桶，软件数量非常恐怖，这一点要注意！等要用的时候再装还来得及。
+		
+	什么，你要其它的 DE？这个可以自己装。
+	
+	KDE：美观大方，易于折腾，最多人推荐。重量级的桌面。CPU 消耗量巨大。
+	GNOME：现代观感，高定制性。重量级的桌面。内存消耗量巨大，CPU 消耗量大。
+	XFCE，MATE，Cinnamon：你得好好配置一波，外观才能看得下去。中等量级的桌面。
+	LXDE，LXQt：在性能和外观的抉择中全选了性能。轻量级的桌面。
+	i3：小白勿入。平铺式窗口管理器。超轻量级的窗口管理器。
+
+设置桌面管理器 SDDM
+	$ sudo pacman -S sddm
+	$ sudo systemctl enable sddm
+
+配置桌面环境下的网络
+	$ sudo systemctl disable netctl
+	$ sudo systemctl enable NetworkManager
+	$ sudo pacman -S network-manager-applet
+
+重启
+	$ reboot
+
+=== 第四次开机 ===
+
+你可能遇到的问题有：
+	各种各样的驱动问题
+		Nvidia，我敲你吗！
+			双显卡驱动问题
+		声卡驱动问题
+			pulseaudio，alsa，aplay，asound 的奇奇怪怪的锅
+		触摸板驱动问题
+		耗电问题
+	软件源的问题
+		Archlinuxcn
+		AUR
+		yay 速度太慢
+	这个终端怎么没有颜色啊？
+	中文设置
+		中文字体的安装
+		桌面系统的中文化
+		中文输入法的安装
+			fcitx 还是 iBus，这是个问题
+			为什么我唤不出来输入法？
+		日语异体字的改正（看看“复”“门”“关”这些字是不是不太对劲？）
+	个性化设置
+		桌面系统的观感设置
+	奇特的软件
+		WPS Office
+		QQ / TIM，微信
+	跨，越，G，F，W
+	软件太新导致的和其他人的兼容问题
+	Windows 更新大概率炸 EFI 的问题
+	身为 Arch 用户碰到的各种新鲜的错误
+
+善用 ArchWiki、百度和必应（当然还有谷歌），一切问题都是可以解决的。
+当一切都准备就绪，恭喜你成为了 ArchLinux 的入门用户！
