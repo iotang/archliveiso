@@ -89,6 +89,7 @@ $ 普通用户下的命令
 	# arch-chroot /mnt
 
 注意，从现在开始，你已经开始设置机上的系统了！
+（即使没有 chroot 到新的系统，仍然可以通过 pacstrap /mnt XXXX 来给新的系统安装包。）
 
 设置时区
 	# ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -126,6 +127,9 @@ $ 普通用户下的命令
 如果你是 Intel CPU
 	# pacman -S intel-ucode
 
+如果你是 AMD CPU
+	# pacman -S amd-ucode
+
 创建引导 「高危」
 	# pacman -S grub efibootmgr
 	# grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
@@ -156,6 +160,9 @@ $ 普通用户下的命令
 		# %wheel ALL=(ALL)ALL
 	然后去掉前面的井号，也就是变成这样子：
 		%wheel ALL=(ALL)ALL
+
+给新用户设置密码
+	# passwd 你的名字
 
 重启
 	# reboot
@@ -192,15 +199,15 @@ $ 普通用户下的命令
 		
 		全家桶是真的全家桶，软件数量非常恐怖，这一点要注意！等要用的时候再装还来得及。
 		
-	什么，你要其它的 DE？这个可以自己装。
-	
-	KDE：美观大方，易于折腾，最多人推荐。重量级的桌面。CPU 消耗量巨大。
-	GNOME：现代观感，高定制性。重量级的桌面。内存消耗量巨大，CPU 消耗量大。
-	XFCE，MATE，Cinnamon：你得好好配置一波，外观才能看得下去。中等量级的桌面。
-	LXDE，LXQt：在性能和外观的抉择中全选了性能。轻量级的桌面。
+	什么，你要其它的 DE？这个可以自己装，你甚至可以百度到相关内容！
+	小绿龙桌面系统 KDE：美观大方，易于折腾，自带软件素质极高，最多人推荐。重量级的桌面。CPU 消耗量巨大。
+	小脚丫桌面系统 GNOME：现代观感，海量插件。重量级的桌面。内存消耗量巨大，CPU 消耗量大。
+	小老鼠桌面系统 XFCE：性能与外观的其中一种平衡。高定制性。偏重量级的桌面。
+	MATE，Cinnamon：你得好好配置一波，外观才能看得下去。中等量级的桌面。
+	小燕子桌面系统 LXDE，小蜂鸟桌面系统 LXQt：在性能和外观的抉择中全选了性能。轻量级的桌面。
 	i3：小白勿入。平铺式窗口管理器。超轻量级的窗口管理器。
 
-设置桌面管理器 SDDM
+设置桌面管理器 SDDM（注意 KDE 使用 SDDM，而其它桌面环境不一定！）
 	$ sudo pacman -S sddm
 	$ sudo systemctl enable sddm
 

@@ -14,7 +14,7 @@ iotang 很喜欢桌面环境！
 
 `pacman.conf` 里启动了 `multilib` 和 `archlinuxcn`。
 
-`build.sh` 里把原来两个要 wget 的 EFI 文件替换成从本地获取。
+`build.sh` 里把原来两个要从某个上不去的网站弄下来的 EFI 文件提前下载好，替换成从本地获取。
 
 `packages.x86_64` 里默认搞了 KDE 桌面系统和一点基础软件，以及很多的驱动（显卡，有线网卡，无线网卡什么的）。
 
@@ -24,19 +24,30 @@ iotang 很喜欢桌面环境！
 
 #### 依赖环境
 
-```bash
+```plain
 $ sudo pacman -S archiso
 ```
 
 #### 开始制造
 
-```bash
+必须进入 root 状态。
+
+```plain
 $ su
+```
+
+推荐先把这个目录另外复制一份。
+
+```plain
+# cp -r archliveiso archlive_tmp
+# cd archlive_tmp
 # ./build.sh -v
 ```
 
-这可能需要很长文件。
+这可能需要很长时间。
 
 然后在文件夹 `out` 里面可以看到一个镜像文件。
 
 这个文件大小大概是 `1.6 GB`。
+
+进入 Live CD 的时候，用 e 和 Tab 键进入内核参数编辑模式，加上一个 cow_spacesize=8G（或者一个很大的空间），否则你可能会在安装的时候遇上磁盘空间不足的错误。

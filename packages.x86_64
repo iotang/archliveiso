@@ -79,6 +79,8 @@ wvdial
 xfsprogs
 xl2tpd
 
+archlinuxcn-keyring
+
 xorg
 mesa
 xorg-drivers
@@ -99,5 +101,11 @@ sddm
 kdebase
 kdeutils
 
+fcitx
+fcitx-im
+kcm-fcitx
+fcitx-libpinyin
+
 firefox
+firefox-i18n-zh-cn
 xdg-user-dirs
