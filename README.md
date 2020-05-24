@@ -12,6 +12,8 @@ iotang 很喜欢桌面环境！
 
 `root` 账户密码 `root`；`live` 账户密码 `live`。
 
+Live 系统的根目录扩大到 2G。
+
 `pacman.conf` 里启动了 `multilib` 和 `archlinuxcn`。
 
 `build.sh` 里把原来两个要从某个上不去的网站弄下来的 EFI 文件提前下载好，替换成从本地获取。
@@ -49,5 +51,3 @@ $ su
 然后在文件夹 `out` 里面可以看到一个镜像文件。
 
 这个文件大小大概是 `1.6 GB`。
-
-进入 Live CD 的时候，用 e 和 Tab 键进入内核参数编辑模式，加上一个 cow_spacesize=8G（或者一个很大的空间），否则你可能会在安装的时候遇上磁盘空间不足的错误。
